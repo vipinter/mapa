@@ -1010,23 +1010,8 @@ function alternarFS(){
   else if(document.documentElement.requestFullscreen){ document.documentElement.requestFullscreen(); }
 }
 document.getElementById('btnFS').addEventListener('click',alternarFS);
-/* Los navegadores solo permiten el modo pantalla completa tras un gesto del
-   usuario: se solicita al cargar (por si el entorno lo permite, p. ej. con la
-   página instalada como app) y, si no, en el primer toque o clic en cualquier
-   parte. El botón de pantalla permite salir y volver en cualquier momento. */
-function pedirFS(){
-  if(!document.fullscreenElement && document.documentElement.requestFullscreen){
-    try{ document.documentElement.requestFullscreen().catch(function(){}); }catch(e){}
-  }
-}
-window.addEventListener('load',pedirFS);
-let fsAlPrimerToque=true;
-window.addEventListener('pointerdown',function(e){
-  if(!fsAlPrimerToque) return;
-  if(e.target && e.target.closest && e.target.closest('#btnFS')) return;
-  fsAlPrimerToque=false;
-  pedirFS();
-});
+/* La pantalla completa solo se activa cuando el usuario pulsa el botón.
+   Los navegadores móviles bloquean las solicitudes automáticas al cargar. */
 
 /* ============ Inicio ============ */
 etiquetaPlay(I_PLAY+'<span>Iniciar viaje</span>');
@@ -1044,4 +1029,15 @@ function ocultarCarga(){
 }
 capa.on('load',ocultarCarga);
 setTimeout(ocultarCarga,3000);
+/* Recalcular el tamaño de Leaflet después de que el navegador termine de
+   mostrar la página y cuando cambie la orientación del teléfono. */
+window.addEventListener('load',function(){
+  setTimeout(function(){ map.invalidateSize({pan:false}); },250);
+});
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){ map.invalidateSize({pan:false}); },350);
+});
+window.addEventListener('resize',function(){
+  map.invalidateSize({pan:false,debounceMoveend:true});
+});
 </script></body></html>
